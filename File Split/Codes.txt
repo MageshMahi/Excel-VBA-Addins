@@ -1,0 +1,59 @@
+
+Public rng As Range, I As Range, rng2 As Range
+Public Nme As String
+Public WS As String
+Public wb As Workbook
+
+
+Sub Click_to_Split()
+
+Set wb = ActiveWorkbook
+WS = ActiveSheet.Name
+
+Set rng = Application.InputBox("Please select the column range", , , , , , , 8)
+
+On Error Resume Next
+Application.DisplayAlerts = False
+Application.ScreenUpdating = False
+Sheets("Duplicate").Delete
+On Error GoTo 0
+
+rng.Copy
+
+Sheets.Add.Name = "Duplicate"
+
+Sheets("Duplicate").Range("A1").PasteSpecial xlValues
+
+Sheets("Duplicate").Select
+
+Range("A:A").RemoveDuplicates Columns:=1, Header:=xlNo
+
+Set rng2 = Range("A1").CurrentRegion
+
+Sheets(WS).AutoFilterMode = False
+For Each I In rng2
+    Name = I.Value
+    
+    Sheets(WS).Range("A1:XY1").AutoFilter field:=(rng.Column), Criteria1:=I
+    
+    Sheets(WS).Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible).Copy
+    
+    Workbooks.Add
+    
+    ActiveWorkbook.ActiveSheet.Range("A1").PasteSpecial xlAll
+    
+    ActiveWorkbook.SaveAs Filename:=wb.Path & "\Data" & "\" & I & ".xlsx"
+    
+    ActiveWorkbook.Close
+    
+Next
+
+Application.DisplayAlerts = True
+Application.ScreenUpdating = True
+Set rng = Nothing
+Set rng2 = Nothing
+clm = ""
+Set wb = Nothing
+
+
+End Sub
